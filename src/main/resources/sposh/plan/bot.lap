@@ -1,0 +1,18 @@
+(
+	(C DealWithFlagHolder
+		(elements
+			((ShootFlagHolder (trigger ((ctfbot.sense.dm.IsShooting true !=))) ctfbot.action.ctf.ShootFlagHolder))
+			((RunToFlagHolder (trigger ((cz.cuni.amis.pogamut.sposh.executor.Succeed))) ctfbot.action.ctf.RunToFlag($team='ctfbot.Team.ENEMY)))
+		)
+	)
+	(DC life
+		(drives 
+			  ((NoEnemyNoShooting (trigger ((ctfbot.sense.dm.SeePlayer($team='ctfbot.Team.ENEMY) true !=) (ctfbot.sense.dm.IsShooting))) ctfbot.action.dm.StopShooting))
+			  ((FlagHolder (trigger ((ctfbot.sense.ctf.SeeFlagHolder($team='ctfbot.Team.ENEMY) true ==))) DealWithFlagHolder($team='ctfbot.Team.ENEMY)))
+			  ((Enemy (trigger ((ctfbot.sense.dm.SeePlayer($team='ctfbot.Team.ENEMY) true ==) (ctfbot.sense.dm.IsShooting true !=))) ctfbot.action.dm.ShootPlayerWithPrefs))
+			  ((SearchFlag (trigger ((ctfbot.sense.ctf.FlagAtBase($team='ctfbot.Team.FRIEND) true !=))) ctfbot.action.ctf.RunToFlag($team='ctfbot.Team.FRIEND)))
+			  ((ReturnWithFlag (trigger ((ctfbot.sense.ctf.HoldingFlag) (ctfbot.sense.ctf.FlagAtBase($team='ctfbot.Team.FRIEND) true ==))) ctfbot.action.ctf.RunToBase($team='ctfbot.Team.FRIEND)))
+			  ((StealFlag ctfbot.action.ctf.RunToFlag($team='ctfbot.Team.ENEMY)))
+		)
+	)
+)
