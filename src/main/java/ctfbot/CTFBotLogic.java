@@ -1,5 +1,12 @@
 package ctfbot;
 
+import ctfbot.messages.InfoType;
+import static ctfbot.messages.InfoType.ENEMY;
+import static ctfbot.messages.InfoType.ENEMY_FLAG;
+import static ctfbot.messages.InfoType.FRIEND;
+import static ctfbot.messages.InfoType.OUR_FLAG;
+import ctfbot.messages.LocationMessage;
+import cz.cuni.amis.pogamut.base.communication.worldview.listener.annotation.EventListener;
 import cz.cuni.amis.pogamut.sposh.ut2004.StateSposhLogicController;
 import cz.cuni.amis.pogamut.ut2004.agent.module.sensor.AgentInfo;
 import cz.cuni.amis.pogamut.ut2004.bot.IUT2004BotController;
@@ -9,6 +16,9 @@ import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.BotKill
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.ConfigChange;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.GameInfo;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.InitedMessage;
+import cz.cuni.amis.pogamut.ut2004.teamcomm.bot.UT2004TCClient;
+import cz.cuni.amis.pogamut.ut2004.teamcomm.bot.UT2004BotTCController;
+import cz.cuni.amis.pogamut.ut2004.teamcomm.mina.client.TCMinaClient;
 import cz.cuni.amis.pogamut.ut2004.utils.UT2004BotRunner;
 import cz.cuni.amis.utils.exception.PogamutException;
 import java.io.IOException;
@@ -26,6 +36,8 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
     private String SPOSH_PLAN_RESOURCE = "sposh/plan/bot.lap";
 //	private String SPOSH_PLAN_RESOURCE = "sposh/plan/ctfbot-example.lap";
 
+   
+    
     @Override
     protected String getPlan() throws IOException {
         return getPlanFromResource(SPOSH_PLAN_RESOURCE);                
@@ -50,6 +62,8 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
      * @see Initialize
      * @return
      */
+    
+    
     @Override
     public Initialize getInitializeCommand() {
         int team = (botCount++ % 2 == 0) ? AgentInfo.TEAM_BLUE : AgentInfo.TEAM_RED;
@@ -67,6 +81,49 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
 
     @Override
     public void botKilled(BotKilled event) {
+    }
+    
+     /*
+     TCMessage handling for different type of messages
+     */
+    
+    //Location Message Handle
+    //locationMessage.getUnrealId()
+    //locationMessage.getLocation()
+    //locationMessage.getInfoType()
+    @EventListener(eventClass = LocationMessage.class)
+    public void onLocationReceive(LocationMessage locationMessage){
+	   
+        switch(locationMessage.getInfoType()){
+                case FRIEND:
+                        //handle friend location receive
+                    break;
+                case ENEMY:
+                        //handle enemy location receive
+                    break;
+
+                case OUR_FLAG:
+                       //handle our flag location receive 
+                    break;
+                case ENEMY_FLAG:
+                        //handle enemy flag location receive
+                    break;
+        }
+	   
+    }
+    
+    //Example usage of Location message
+    public void sendMyLocationMessage() {
+        
+        if(!context.getTCClient().isConnected()){
+		return;
+		}
+        
+        context.getTCClient().sendToTeamOthers(
+                new LocationMessage(
+                    bot.getLocation(), 
+                    context.getInfo().getId(), 
+                    InfoType.FRIEND));
     }
 
     @Override
