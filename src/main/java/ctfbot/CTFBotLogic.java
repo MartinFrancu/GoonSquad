@@ -36,6 +36,11 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
     private String SPOSH_PLAN_RESOURCE = "sposh/plan/bot.lap";
 //	private String SPOSH_PLAN_RESOURCE = "sposh/plan/ctfbot-example.lap";
 
+    
+    private void DealWithShooting()
+    {
+        //CTFContexBot myContext = getCo//'ntext();
+    }
    
     
     @Override
@@ -83,34 +88,7 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
     public void botKilled(BotKilled event) {
     }
     
-     /*
-     TCMessage handling for different type of messages
-     */
-    
-    //Location Message Handle
-    //locationMessage.getUnrealId()
-    //locationMessage.getLocation()
-    //locationMessage.getInfoType()
-    @EventListener(eventClass = LocationMessage.class)
-    public void onLocationReceive(LocationMessage locationMessage){
-	   
-        switch(locationMessage.getInfoType()){
-                case FRIEND:
-                        //handle friend location receive
-                    break;
-                case ENEMY:
-                        //handle enemy location receive
-                    break;
 
-                case OUR_FLAG:
-                       //handle our flag location receive 
-                    break;
-                case ENEMY_FLAG:
-                        //handle enemy flag location receive
-                    break;
-        }
-	   
-    }
     
     //Example usage of Location message
     public void sendMyLocationMessage() {
@@ -118,24 +96,30 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
         if(!context.getTCClient().isConnected()){
 		return;
 		}
-        
         context.getTCClient().sendToTeamOthers(
                 new LocationMessage(
                     bot.getLocation(), 
                     context.getInfo().getId(), 
-                    InfoType.FRIEND));
+                    InfoType.FRIEND, 
+                    context.getInfo().getId()
+                 ));
     }
 
     @Override
     protected void logicBeforePlan() {
+        sendMyLocationMessage();
         getContext().logicBeforePlan();
         super.logicBeforePlan();
+        // 
     }
 
     @Override
     protected void logicAfterPlan() {
         super.logicAfterPlan();
-        getContext().logicAfterPlan();        
+        getContext().logicAfterPlan(); 
+        /// here deal with shooting...
+        
+        
     }    
 
     public static void main(String[] args) throws PogamutException {

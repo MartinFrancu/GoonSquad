@@ -28,26 +28,33 @@ import cz.cuni.amis.utils.token.Tokens;
 public class LocationMessage extends Message{
     public static final IToken MESSAGE_TYPE = Tokens.get("Location");
     private final Location location;
-    private final UnrealId unrealId;
+    private final UnrealId senderId;
     private final InfoType infoType;
-    
+    private final UnrealId targetId;
+            
     public Location getLocation() {
 		return location;
 	}
 
-    public UnrealId getUnrealId() {
-		return unrealId;
+    public UnrealId getSenderId() {
+		return senderId;
 	}
 
     public InfoType getInfoType() {
 		return infoType;
 	}
+    public UnrealId getTargetId() {
+		return targetId;
+	}
     
-    public LocationMessage(Location location, UnrealId unrealId, InfoType infoType) {
+    
+    
+    public LocationMessage(Location location, UnrealId unrealId, InfoType infoType, UnrealId targetIdin) {
 		super(String.format("Location - type: %s, unrealId %s, location: %s", infoType, unrealId, location), 
 				MESSAGE_TYPE);
 		this.location = location;
-		this.unrealId = unrealId;
+		this.senderId = unrealId;
 		this.infoType = infoType;
+                this.targetId = targetIdin;
 	}
 }

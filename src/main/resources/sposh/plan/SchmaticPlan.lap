@@ -1,0 +1,30 @@
+(
+	(C Head
+		(elements
+			((GetTheFlag cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((ReturnFlag cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((KillTheFlagHolder cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+		)
+	)
+	(C Defender
+		(elements
+			((Scanvenge cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((GuardFlag cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((FollowFlagHolder cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+		)
+	)
+	(C Tail
+		(elements
+			((FollowHead cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((LookBack cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+		)
+	)
+	(DC life
+		(drives 
+			  ((REPORTENEMY cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			  ((Attacker-Head (trigger ((ctfbot.action.ctf.HasRole($role="Attacker-Head") true ==))) Head))
+			  ((Attacker-Tail (trigger ((ctfbot.action.ctf.HasRole($role="Attacker-Tail") true ==))) Tail))
+			  ((Defender (trigger ((ctfbot.action.ctf.HasRole($role="Defender") true ==))) Defender))
+		)
+	)
+)

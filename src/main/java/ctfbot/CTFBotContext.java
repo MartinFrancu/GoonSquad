@@ -1,8 +1,14 @@
 package ctfbot;
 
 import ctfbot.action.dm.ShootPlayer;
+import static ctfbot.messages.InfoType.ENEMY;
+import static ctfbot.messages.InfoType.ENEMY_FLAG;
+import static ctfbot.messages.InfoType.FRIEND;
+import static ctfbot.messages.InfoType.OUR_FLAG;
+import ctfbot.messages.LocationMessage;
 import ctfbot.tc.CTFCommItems;
 import ctfbot.tc.CTFCommObjectUpdates;
+import cz.cuni.amis.pogamut.base.communication.worldview.listener.annotation.EventListener;
 import cz.cuni.amis.pogamut.sposh.context.UT2004Context;
 import cz.cuni.amis.pogamut.ut2004.agent.module.utils.TabooSet;
 import cz.cuni.amis.pogamut.ut2004.agent.navigation.NavigationState;
@@ -12,6 +18,7 @@ import cz.cuni.amis.pogamut.ut2004.communication.messages.UT2004ItemType;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.Item;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.Player;
 import cz.cuni.amis.utils.flag.FlagListener;
+import java.util.logging.Level;
 
 /**
  * This serves as a template bot for creating simple CTF bot using YaPOSH.
@@ -27,6 +34,14 @@ import cz.cuni.amis.utils.flag.FlagListener;
  */
 public class CTFBotContext extends UT2004Context<UT2004Bot> {
     
+    /*
+    public enum Role
+    {
+        AttackerHead,
+        AttackerTail,
+        Defender
+    } */
+    
     /** Number of the logic iteration. **/
     public int logicIteration = 0;
     /** Time of the last logic... **/
@@ -38,7 +53,11 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     /** Current item our bot is currently going for */
     public Item targetItem = null;
     /** Target enemy player we are currently shooting at */
-    public Player targetPlayer = null;    
+    public Player targetPlayer = null; 
+    /** This is target of team effort. */
+    public Player teamTargetPlayer = null;
+    /** Current bot role. */
+    public String currentRole = "Defender";
     /** Used to taboo items we were stuck going for or we have picked up recently */
     public TabooSet<Item> tabooItems;
     
@@ -120,5 +139,36 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
      * This method is invoked after yaPOSH engine evaluation.
      */
     void logicAfterPlan() {       
+    }
+    
+    
+    
+         /*
+     TCMessage handling for different type of messages
+     */
+    
+    //Location Message Handle
+    //locationMessage.getUnrealId()
+    //locationMessage.getLocation()
+    //locationMessage.getInfoType()
+    @EventListener(eventClass = LocationMessage.class)
+    public void onLocationReceive(LocationMessage locationMessage){
+           
+        switch(locationMessage.getInfoType()){
+                case FRIEND:
+                        //handle friend location receive
+                    break;
+                case ENEMY:
+                        //handle enemy location receive
+                    break;
+
+                case OUR_FLAG:
+                       //handle our flag location receive 
+                    break;
+                case ENEMY_FLAG:
+                        //handle enemy flag location receive
+                    break;
+        }
+	   
     }
 }
