@@ -8,14 +8,19 @@ import static ctfbot.messages.InfoType.OUR_FLAG;
 import ctfbot.messages.LocationMessage;
 import ctfbot.tc.CTFCommItems;
 import ctfbot.tc.CTFCommObjectUpdates;
+import cz.cuni.amis.pogamut.base.agent.navigation.PathExecutorState;
 import cz.cuni.amis.pogamut.base.communication.worldview.listener.annotation.EventListener;
 import cz.cuni.amis.pogamut.sposh.context.UT2004Context;
 import cz.cuni.amis.pogamut.ut2004.agent.module.utils.TabooSet;
 import cz.cuni.amis.pogamut.ut2004.agent.navigation.NavigationState;
+import cz.cuni.amis.pogamut.ut2004.agent.navigation.UT2004PathAutoFixer;
+import cz.cuni.amis.pogamut.ut2004.agent.navigation.stuckdetector.UT2004DistanceStuckDetector;
+import cz.cuni.amis.pogamut.ut2004.agent.navigation.stuckdetector.UT2004TimeStuckDetector;
 import cz.cuni.amis.pogamut.ut2004.bot.impl.UT2004Bot;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.ItemType;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.UT2004ItemType;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.Item;
+import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.NavPoint;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.Player;
 import cz.cuni.amis.utils.flag.FlagListener;
 import java.util.logging.Level;
@@ -61,19 +66,33 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     /** Used to taboo items we were stuck going for or we have picked up recently */
     public TabooSet<Item> tabooItems;
     
+    public TabooSet<NavPoint> tabooNavPoints;
+    
     public String state = "";
+    
+    /**
+     * AutoFixer monitors movement of agent and when it detects faulty
+     * connection in the waypoints, it removes them from navigation logic.
+     */
+    
+    UT2004PathAutoFixer autoFixer;
 
     public CTFBotContext(UT2004Bot bot) {
         super("CTFBotContext", bot);
         // IMPORTANT: Various modules of context must be initialized.
         initialize();
-        
+        autoFixer = new UT2004PathAutoFixer(bot, this.getNavigation().getPathExecutor(), fwMap, aStar, navBuilder);
         // INITIALIZE TEAM COMM
         commObjectUpdates = new CTFCommObjectUpdates(this);
         commItems         = new CTFCommItems(this);
         
         // INITIALIZE CUSTOM MODULES
         tabooItems = new TabooSet<Item>(bot);
+        tabooNavPoints = new TabooSet<NavPoint>(bot);
+        
+        //Add stuck detectors
+        this.getNavigation().getPathExecutor().addStuckDetector(new UT2004TimeStuckDetector(bot, 3.0, 10.0));
+        this.getNavigation().getPathExecutor().addStuckDetector(new UT2004DistanceStuckDetector(bot));
         
         this.getNavigation().addStrongNavigationListener(new FlagListener<NavigationState>() {
             @Override
@@ -81,8 +100,11 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                 switch (changedValue) {
                     case PATH_COMPUTATION_FAILED:
                     case STUCK:
-                        if (targetItem != null)
+                        if (targetItem != null){
                             tabooItems.add(targetItem, 30);
+                            //add taboonavpoints
+                        }
+                            
                     break;
                     case TARGET_REACHED:
                         if (targetItem != null)
