@@ -25,7 +25,7 @@ import cz.cuni.amis.utils.token.Tokens;
  *
  * @author student
  */
-public class LocationMessage extends Message{
+public class CTFMessage extends Message{
     public static final IToken MESSAGE_TYPE = Tokens.get("Location");
     private final Location location;
     private final UnrealId senderId;
@@ -49,7 +49,7 @@ public class LocationMessage extends Message{
     
     
     
-    public LocationMessage(Location location, UnrealId unrealId, InfoType infoType, UnrealId targetIdin) {
+    public CTFMessage(Location location, UnrealId unrealId, InfoType infoType, UnrealId targetIdin) {
 		super(String.format("Location - type: %s, unrealId %s, location: %s", infoType, unrealId, location), 
 				MESSAGE_TYPE);
 		this.location = location;

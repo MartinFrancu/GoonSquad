@@ -15,7 +15,7 @@
 	)
 	(C Tail
 		(elements
-			((FollowHead cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((FollowHead ctfbot.action.ctf.FollowHeadInFormation))
 			((LookBack cz.cuni.amis.pogamut.sposh.executor.DoNothing))
 		)
 	)

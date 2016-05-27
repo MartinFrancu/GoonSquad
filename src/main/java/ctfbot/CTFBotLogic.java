@@ -1,7 +1,7 @@
 package ctfbot;
 
 import ctfbot.messages.InfoType;
-import ctfbot.messages.LocationMessage;
+import ctfbot.messages.CTFMessage;
 import cz.cuni.amis.pogamut.base3d.worldview.object.ILocated;
 import cz.cuni.amis.pogamut.sposh.ut2004.StateSposhLogicController;
 import cz.cuni.amis.pogamut.unreal.communication.messages.UnrealId;
@@ -191,18 +191,25 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
 
     @Override
     public void botKilled(BotKilled event) {
+        // 
+        if(context.currentRole.equals("Attacker-Head"))
+        {
+            context.currentRole = "Defender";
+             // send message that leader died..
+            context.setCTFMessageChangeLeader(context.getInfo().getId(), context.getPlayers().getNearestFriend(10000).getId());
+        }
     }
     
 
     
     //Example usage of Location message
-    public void sendMyLocationMessage() {
+    public void sendCTFMessageFriend() {
         
         if(!context.getTCClient().isConnected()){
 		return;
 		}
         context.getTCClient().sendToTeamOthers(
-                new LocationMessage(
+                new CTFMessage(
                     bot.getLocation(), 
                     context.getInfo().getId(), 
                     InfoType.FRIEND, 
@@ -212,7 +219,7 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
 
     @Override
     protected void logicBeforePlan() {
-        sendMyLocationMessage();
+        sendCTFMessageFriend();
         getContext().logicBeforePlan();
         super.logicBeforePlan();
         // 

@@ -5,11 +5,13 @@ import static ctfbot.messages.InfoType.ENEMY;
 import static ctfbot.messages.InfoType.ENEMY_FLAG;
 import static ctfbot.messages.InfoType.FRIEND;
 import static ctfbot.messages.InfoType.OUR_FLAG;
-import ctfbot.messages.LocationMessage;
+import ctfbot.messages.CTFMessage;
+import ctfbot.messages.InfoType;
 import ctfbot.tc.CTFCommItems;
 import ctfbot.tc.CTFCommObjectUpdates;
 import cz.cuni.amis.pogamut.base.communication.worldview.listener.annotation.EventListener;
 import cz.cuni.amis.pogamut.sposh.context.UT2004Context;
+import cz.cuni.amis.pogamut.unreal.communication.messages.UnrealId;
 import cz.cuni.amis.pogamut.ut2004.agent.module.utils.TabooSet;
 import cz.cuni.amis.pogamut.ut2004.agent.navigation.NavigationState;
 import cz.cuni.amis.pogamut.ut2004.agent.navigation.UT2004PathAutoFixer;
@@ -23,6 +25,7 @@ import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.NavPoin
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.Player;
 import cz.cuni.amis.utils.Cooldown;
 import cz.cuni.amis.utils.flag.FlagListener;
+import java.util.logging.Level;
 
 /**
  * This serves as a template bot for creating simple CTF bot using YaPOSH.
@@ -37,14 +40,7 @@ import cz.cuni.amis.utils.flag.FlagListener;
  * @author Jimmy
  */
 public class CTFBotContext extends UT2004Context<UT2004Bot> {
-    
-    /*
-    public enum Role
-    {
-        AttackerHead,
-        AttackerTail,
-        Defender
-    } */
+
     
     /** Number of the logic iteration. **/
     public int logicIteration = 0;
@@ -64,11 +60,18 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     
     public TabooSet<NavPoint> tabooNavPoints;
     
-    public String state = "";
     
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// TEAM ATRIBUTES:
+   // public String state = "Defender";
+    public Player teamHead = null;
+    
+    
+    ///////////////////////////////////////////////////////////////////////////
     
     ////////////////////////////////////////////////////////////////////////////
-    // SHOOTING PARAMETERES:
+    // SHOOTING ATRIBUTES:
     /** Target enemy player we are currently shooting at */
     public Player targetPlayer = null; 
     /** This is target of team effort. */
@@ -174,6 +177,29 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     void logicAfterPlan() {       
     }
     
+     //Example usage of Location message
+    public void setCTFMessageChangeLeader(UnrealId oldLeader, UnrealId newLeader) 
+    {
+        
+        if(!getTCClient().isConnected())
+        {
+            /// we should log this
+            log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>>>>>could not find TCclient!!!");
+		return;
+	
+        }
+        getTCClient().sendToTeamOthers
+                (
+                    new CTFMessage
+                    (
+                        bot.getLocation(), 
+                        oldLeader, 
+                        InfoType.LEADER_DIED, 
+                        newLeader // Id of new leader...
+                    )
+                );
+    }
+    
     
     
          /*
@@ -184,10 +210,10 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     //locationMessage.getUnrealId()
     //locationMessage.getLocation()
     //locationMessage.getInfoType()
-    @EventListener(eventClass = LocationMessage.class)
-    public void onLocationReceive(LocationMessage locationMessage){
+    @EventListener(eventClass = CTFMessage.class)
+    public void onCTFMessageReceive(CTFMessage message){
            
-        switch(locationMessage.getInfoType()){
+        switch(message.getInfoType()){
                 case FRIEND:
                         //handle friend location receive
                     break;
@@ -202,8 +228,16 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                         //handle enemy flag location receive
                     break;
                 case LETS_KILL_THIS_ONE:
-                    this.teamTargetPlayer = this.getPlayers().getPlayer(locationMessage.getTargetId());
+                    this.teamTargetPlayer = this.getPlayers().getPlayer(message.getTargetId());
                     break;
+                case LEADER_DIED:
+                    this.teamHead = this.getPlayers().getPlayer(message.getTargetId()); //target Id is the new leader
+                    if(teamHead.getId() == this.getInfo().getId())
+                    {
+                        this.currentRole = "Attacker-Head";
+                    }
+                default:
+                    log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>> Unknown message type.");
         }
 	   
     }

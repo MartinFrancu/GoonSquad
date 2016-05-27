@@ -26,5 +26,6 @@ public enum InfoType {
 	ITEM,
 	OUR_FLAG,
 	ENEMY_FLAG,
-        LETS_KILL_THIS_ONE
+        LETS_KILL_THIS_ONE,
+        LEADER_DIED,
 }
