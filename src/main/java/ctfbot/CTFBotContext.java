@@ -8,7 +8,6 @@ import static ctfbot.messages.InfoType.OUR_FLAG;
 import ctfbot.messages.LocationMessage;
 import ctfbot.tc.CTFCommItems;
 import ctfbot.tc.CTFCommObjectUpdates;
-import cz.cuni.amis.pogamut.base.agent.navigation.PathExecutorState;
 import cz.cuni.amis.pogamut.base.communication.worldview.listener.annotation.EventListener;
 import cz.cuni.amis.pogamut.sposh.context.UT2004Context;
 import cz.cuni.amis.pogamut.ut2004.agent.module.utils.TabooSet;
@@ -22,8 +21,8 @@ import cz.cuni.amis.pogamut.ut2004.communication.messages.UT2004ItemType;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.Item;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.NavPoint;
 import cz.cuni.amis.pogamut.ut2004.communication.messages.gbinfomessages.Player;
+import cz.cuni.amis.utils.Cooldown;
 import cz.cuni.amis.utils.flag.FlagListener;
-import java.util.logging.Level;
 
 /**
  * This serves as a template bot for creating simple CTF bot using YaPOSH.
@@ -57,10 +56,7 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     public CTFCommItems commItems;
     /** Current item our bot is currently going for */
     public Item targetItem = null;
-    /** Target enemy player we are currently shooting at */
-    public Player targetPlayer = null; 
-    /** This is target of team effort. */
-    public Player teamTargetPlayer = null;
+    
     /** Current bot role. */
     public String currentRole = "Defender";
     /** Used to taboo items we were stuck going for or we have picked up recently */
@@ -69,6 +65,29 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     public TabooSet<NavPoint> tabooNavPoints;
     
     public String state = "";
+    
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // SHOOTING PARAMETERES:
+    /** Target enemy player we are currently shooting at */
+    public Player targetPlayer = null; 
+    /** This is target of team effort. */
+    public Player teamTargetPlayer = null;
+    /**cooldowns for slow shooting weapons*/
+    public Cooldown rocketLauncherCD = null; 
+    public Cooldown lightingGunCD = null; 
+    public Cooldown sniperRifleCD = null; 
+     /**
+     * Here we are marking if our bot "is shooting" or "is about to start shooting"; see {@link ShootPlayer} and alikes.
+     */
+    public boolean isShooting;
+    
+    /**
+     * Here we are marking what weapon our bot currently wields in its hands or is about to be changed to.
+     */
+    public ItemType currentWeapon;
+    
+    ////////////////////////////////////////////////////////////////////////////
     
     /**
      * AutoFixer monitors movement of agent and when it detects faulty
@@ -125,15 +144,7 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                 .addGeneralPref(UT2004ItemType.ASSAULT_RIFLE, true); 
     }
 
-    /**
-     * Here we are marking if our bot "is shooting" or "is about to start shooting"; see {@link ShootPlayer} and alikes.
-     */
-    public boolean isShooting;
-    
-    /**
-     * Here we are marking what weapon our bot currently wields in its hands or is about to be changed to.
-     */
-    public ItemType currentWeapon;
+   
     
     /**
      * This method is invoked before yaPOSH engine evaluation.
@@ -189,6 +200,9 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                     break;
                 case ENEMY_FLAG:
                         //handle enemy flag location receive
+                    break;
+                case LETS_KILL_THIS_ONE:
+                    this.teamTargetPlayer = this.getPlayers().getPlayer(locationMessage.getTargetId());
                     break;
         }
 	   
