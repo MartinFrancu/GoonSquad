@@ -31,7 +31,7 @@ import java.util.logging.Level;
 public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotContext> {
 
     //private String SPOSH_PLAN_RESOURCE = "sposh/plan/bot.lap";
-    private String SPOSH_PLAN_OURS = "sposh/plan/SchmaticPlan.lap";
+    private String SPOSH_PLAN_OURS = "sposh/plan/SchematicPlan.lap";
 //	private String SPOSH_PLAN_RESOURCE = "sposh/plan/ctfbot-example.lap";
 
     
@@ -193,6 +193,12 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
     public void botKilled(BotKilled event) {
         // 
         if(context.currentRole.equals("Attacker-Head"))
+        {
+            context.currentRole = "Defender";
+             // send message that leader died..
+            context.setCTFMessageChangeLeader(context.getInfo().getId(), context.getPlayers().getNearestFriend(10000).getId());
+        }
+         if(context.currentRole.equals("Attacker-Tail"))
         {
             context.currentRole = "Defender";
              // send message that leader died..

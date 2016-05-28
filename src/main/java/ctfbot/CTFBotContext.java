@@ -64,8 +64,9 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     
     ///////////////////////////////////////////////////////////////////////////
     /// TEAM ATRIBUTES:
-   // public String state = "Defender";
+    public String state = "";
     public Player teamHead = null;
+    public Player teamTail = null;
     
     
     ///////////////////////////////////////////////////////////////////////////
@@ -200,6 +201,28 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                 );
     }
     
+     public void setCTFMessageTailDied(UnrealId oldTail) 
+    {
+        
+        if(!getTCClient().isConnected())
+        {
+            /// we should log this
+            log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>>>>>could not find TCclient!!!");
+		return;
+	
+        }
+        getTCClient().sendToTeamOthers
+                (
+                    new CTFMessage
+                    (
+                        bot.getLocation(), 
+                        oldTail, 
+                        InfoType.TAIL_DIED, 
+                        null// Id of new tail...
+                    )
+                );
+    }
+    
     
     
          /*
@@ -235,7 +258,15 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                     if(teamHead.getId() == this.getInfo().getId())
                     {
                         this.currentRole = "Attacker-Head";
+                        if(teamHead == teamTail)
+                        {// team head cannot be team tail
+                            teamTail = null;
+                        }
                     }
+                case TAIL_DIED:
+                    ///// WHAT TO DO WHEN TAIL DIED MESSAGE COMES => change you record who is tail
+                    
+                    /// THERE IS STILL MISSING A MESSAGE THAT SOMEONE BECOME A TAIL, I THINK
                 default:
                     log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>> Unknown message type.");
         }

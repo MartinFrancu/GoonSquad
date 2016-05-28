@@ -8,7 +8,8 @@
 	)
 	(C Defender
 		(elements
-			((Scanvenge cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((BecameAHead (trigger ((ctfbot.sense.dm.SeePlayer($team='ctfbot.Team.ENEMY) true ==))) ctfbot.action.ctf.BecomeAttacker))
+			((Scavenge (trigger ((ctfbot.sense.dm.SeePlayer($team='ctfbot.Team.ENEMY) false ==))) WhatToGet))
 			((GuardFlag cz.cuni.amis.pogamut.sposh.executor.DoNothing))
 			((FollowFlagHolder cz.cuni.amis.pogamut.sposh.executor.DoNothing))
 		)
@@ -17,6 +18,18 @@
 		(elements
 			((FollowHead ctfbot.action.ctf.FollowHeadInFormation))
 			((LookBack cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+		)
+	)
+	(C Scavenge
+		(elements
+			((ScavengerForWeapons cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+		)
+	)
+	(C WhatToGet
+		(elements
+			((RunForHealth (trigger ((ctfbot.sense.dm.Health 50 <))) ctfbot.action.dm.RunForItem($item='ctfbot.Item.HEALTH)))
+			((RunForItem (trigger ((ctfbot.sense.dm.IsPickableItem($type='ctfbot.Item.U_DAMAGE_PACK) true ==))) ctfbot.action.dm.RunForItem($item='ctfbot.Item.U_DAMAGE_PACK)))
+			((RunForWeapon (trigger ((ctfbot.sense.dm.IsPickableWeapon($weapon='ctfbot.Weapon.MINIGUN) true ==) (ctfbot.sense.dm.HasWeapon($weapon='ctfbot.Weapon.MINIGUN) false ==))) ctfbot.action.dm.RunForWeapon($weapon='ctfbot.Weapon.MINIGUN)))
 		)
 	)
 	(DC life

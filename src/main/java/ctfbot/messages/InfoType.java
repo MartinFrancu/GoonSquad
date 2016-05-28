@@ -28,4 +28,5 @@ public enum InfoType {
 	ENEMY_FLAG,
         LETS_KILL_THIS_ONE,
         LEADER_DIED,
+        TAIL_DIED
 }
