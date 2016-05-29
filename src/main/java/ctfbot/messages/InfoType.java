@@ -27,6 +27,10 @@ public enum InfoType {
 	OUR_FLAG,
 	ENEMY_FLAG,
         LETS_KILL_THIS_ONE,
-        LEADER_DIED,
-        TAIL_DIED
+        HEAD_DIED,
+        TAIL_DIED,
+        BECAME_HEAD,
+        BECAME_TAIL,
+        DEFENDER_ADDED,
+        DEFENDER_REMOVED
 }

@@ -7,6 +7,7 @@ import static ctfbot.messages.InfoType.FRIEND;
 import static ctfbot.messages.InfoType.OUR_FLAG;
 import ctfbot.messages.CTFMessage;
 import ctfbot.messages.InfoType;
+import static ctfbot.messages.InfoType.DEFENDER_ADDED;
 import ctfbot.tc.CTFCommItems;
 import ctfbot.tc.CTFCommObjectUpdates;
 import cz.cuni.amis.pogamut.base.communication.worldview.listener.annotation.EventListener;
@@ -53,8 +54,7 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     /** Current item our bot is currently going for */
     public Item targetItem = null;
     
-    /** Current bot role. */
-    public String currentRole = "Defender";
+    
     /** Used to taboo items we were stuck going for or we have picked up recently */
     public TabooSet<Item> tabooItems;
     
@@ -64,9 +64,13 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     
     ///////////////////////////////////////////////////////////////////////////
     /// TEAM ATRIBUTES:
+    /** Current bot role. */
+    public String currentRole = "Defender";
     public String state = "";
     public Player teamHead = null;
-    public Player teamTail = null;
+    //public int tailCount = 0;
+    public int defenderCount = 1;
+    public boolean reportedIn = false;
     
     
     ///////////////////////////////////////////////////////////////////////////
@@ -170,18 +174,27 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
         	commObjectUpdates.update();
         	commItems.update();
     	}
+        if(!reportedIn)
+        {
+            reportedIn = true;
+            setCTFMessageRoleChagned(getInfo().getId(), InfoType.DEFENDER_ADDED);
+            ++defenderCount;
+        }
     }
 
     /**
      * This method is invoked after yaPOSH engine evaluation.
      */
-    void logicAfterPlan() {       
+    void logicAfterPlan() 
+    {  
+ 
     }
     
      //Example usage of Location message
-    public void setCTFMessageChangeLeader(UnrealId oldLeader, UnrealId newLeader) 
-    {
-        
+  
+     
+     public void setCTFMessageRoleChagned(UnrealId bot, InfoType messageType)
+     { 
         if(!getTCClient().isConnected())
         {
             /// we should log this
@@ -193,36 +206,14 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                 (
                     new CTFMessage
                     (
-                        bot.getLocation(), 
-                        oldLeader, 
-                        InfoType.LEADER_DIED, 
-                        newLeader // Id of new leader...
-                    )
-                );
-    }
-    
-     public void setCTFMessageTailDied(UnrealId oldTail) 
-    {
-        
-        if(!getTCClient().isConnected())
-        {
-            /// we should log this
-            log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>>>>>could not find TCclient!!!");
-		return;
-	
-        }
-        getTCClient().sendToTeamOthers
-                (
-                    new CTFMessage
-                    (
-                        bot.getLocation(), 
-                        oldTail, 
-                        InfoType.TAIL_DIED, 
+                        this.getBot().getLocation(), 
+                        bot, 
+                        messageType, 
                         null// Id of new tail...
                     )
                 );
-    }
-    
+         
+     }
     
     
          /*
@@ -253,20 +244,24 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                 case LETS_KILL_THIS_ONE:
                     this.teamTargetPlayer = this.getPlayers().getPlayer(message.getTargetId());
                     break;
-                case LEADER_DIED:
-                    this.teamHead = this.getPlayers().getPlayer(message.getTargetId()); //target Id is the new leader
-                    if(teamHead.getId() == this.getInfo().getId())
-                    {
-                        this.currentRole = "Attacker-Head";
-                        if(teamHead == teamTail)
-                        {// team head cannot be team tail
-                            teamTail = null;
-                        }
-                    }
+                case HEAD_DIED:
+                    this.teamHead = null;
+                    break;
                 case TAIL_DIED:
-                    ///// WHAT TO DO WHEN TAIL DIED MESSAGE COMES => change you record who is tail
-                    
-                    /// THERE IS STILL MISSING A MESSAGE THAT SOMEONE BECOME A TAIL, I THINK
+                   /// --this.tailCount;
+                    break;
+                case BECAME_HEAD:
+                    this.teamHead = this.getPlayers().getPlayer(message.getSenderId());
+                    break;
+                case BECAME_TAIL:
+                    ///1this.teamTail = this.getPlayers().getPlayer(message.getSenderId());
+                    break;
+                case DEFENDER_ADDED:
+                    ++this.defenderCount;
+                    break;
+                case DEFENDER_REMOVED:
+                    --this.defenderCount;
+                    break;
                 default:
                     log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>> Unknown message type.");
         }

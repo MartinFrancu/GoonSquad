@@ -186,24 +186,28 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
         super.botInitialized(gameInfo, currentConfig, init);
         log.setLevel(Level.INFO);
         bot.getLogger().getCategory(SPOSH_LOG_CATEGORY).setLevel(Level.WARNING);
-        bot.getLogger().getCategory("Yylex").setLevel(Level.OFF);        
+        bot.getLogger().getCategory("Yylex").setLevel(Level.OFF);
+        
     }
 
     @Override
     public void botKilled(BotKilled event) {
         // 
-        if(context.currentRole.equals("Attacker-Head"))
+        context.reportedIn = false;
+        if(context.currentRole.equals("Defender"))
         {
-            context.currentRole = "Defender";
+        --context.defenderCount;
+        }
+        if(context.currentRole.equals("Attacker-Head"))
+        {  
              // send message that leader died..
-            context.setCTFMessageChangeLeader(context.getInfo().getId(), context.getPlayers().getNearestFriend(10000).getId());
+            context.setCTFMessageRoleChagned(context.getInfo().getId(), InfoType.HEAD_DIED);
         }
          if(context.currentRole.equals("Attacker-Tail"))
         {
-            context.currentRole = "Defender";
-             // send message that leader died..
-            context.setCTFMessageChangeLeader(context.getInfo().getId(), context.getPlayers().getNearestFriend(10000).getId());
+           context.setCTFMessageRoleChagned(context.getInfo().getId(), InfoType.TAIL_DIED);
         }
+         context.currentRole = "Defender"; // all starts as defender
     }
     
 

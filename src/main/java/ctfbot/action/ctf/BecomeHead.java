@@ -2,27 +2,25 @@ package ctfbot.action.ctf;
 
 import ctfbot.CTFBotContext;
 import ctfbot.messages.InfoType;
-import cz.cuni.amis.pogamut.sposh.context.UT2004Context;
 import cz.cuni.amis.pogamut.sposh.executor.ActionResult;
-import cz.cuni.amis.pogamut.sposh.executor.Param;
 import cz.cuni.amis.pogamut.sposh.executor.ParamsAction;
 import cz.cuni.amis.pogamut.sposh.executor.PrimitiveInfo;
 
 /**
- * Action FollowHeadInFormation for Yaposh.
+ * Action BecomeHead for Yaposh.
  *
  * @author Marci
  * @param <CONTEXT> Context class of the action. It's an shared object used by
  * all primitives. it is used as a shared memory and for interaction with the
  * environment.
  */
-@PrimitiveInfo(name = "FollowHeadInFormation", description = "Description of FollowHeadInFormation")
-public class FollowHeadInFormation<CONTEXT extends CTFBotContext> extends ParamsAction<CONTEXT> {
+@PrimitiveInfo(name = "BecomeHead", description = "Description of BecomeHead")
+public class BecomeHead<CONTEXT extends CTFBotContext> extends ParamsAction<CONTEXT> {
 
     /**
      * Constructor of the action, used during automatic instantiation.
      */
-    public FollowHeadInFormation(CONTEXT ctx) {
+    public BecomeHead(CONTEXT ctx) {
         super(ctx);
     }
 
@@ -45,18 +43,20 @@ public class FollowHeadInFormation<CONTEXT extends CTFBotContext> extends Params
      */
     public ActionResult run() {
         // Add your progress code
+        ctx.teamHead = ctx.getPlayers().getPlayer(ctx.getInfo().getId());
+        ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.BECAME_HEAD);
         
-        if(ctx.teamHead == null)// should not happen
-        {// there is no team head.. this should not happen, anyway: now I am team head :DDD 
-            ctx.teamHead = ctx.getPlayers().getPlayer(ctx.getInfo().getId());
-           // tell other players..
-            ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(),InfoType.BECAME_HEAD);
-            ctx.currentRole = "Attacker-Head";
-            return ActionResult.FINISHED;
+        
+        ctx.currentRole = "Attacker-Head";
+        
+        if(ctx.currentRole.equals("Defender"))
+        {
+            ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.DEFENDER_REMOVED);
         }
-        // if there is a head, I am going to follow him
-        ctx.getNavigation().navigate(ctx.teamHead);
-        return ActionResult.RUNNING;
+        
+        ctx.getBot().getBotName().setInfo("HEAD");
+        
+        return ActionResult.FINISHED;
     }
 
     /**

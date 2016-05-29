@@ -1,11 +1,13 @@
 package ctfbot.action.ctf;
 
 import ctfbot.CTFBotContext;
+import ctfbot.messages.InfoType;
 import cz.cuni.amis.pogamut.sposh.context.UT2004Context;
 import cz.cuni.amis.pogamut.sposh.executor.ActionResult;
 import cz.cuni.amis.pogamut.sposh.executor.Param;
 import cz.cuni.amis.pogamut.sposh.executor.ParamsAction;
 import cz.cuni.amis.pogamut.sposh.executor.PrimitiveInfo;
+import cz.cuni.amis.pogamut.unreal.communication.messages.UnrealId;
 
 /**
  * Action BecomeAttacker for Yaposh.
@@ -15,13 +17,13 @@ import cz.cuni.amis.pogamut.sposh.executor.PrimitiveInfo;
  * all primitives. it is used as a shared memory and for interaction with the
  * environment.
  */
-@PrimitiveInfo(name = "BecomeAttacker", description = "Description of BecomeAttacker")
-public class BecomeAttacker<CONTEXT extends CTFBotContext> extends ParamsAction<CONTEXT> {
+@PrimitiveInfo(name = "BecomeTail", description = "Description of BecomeTail")
+    public class BecomeTail<CONTEXT extends CTFBotContext> extends ParamsAction<CONTEXT> {
 
     /**
      * Constructor of the action, used during automatic instantiation.
      */
-    public BecomeAttacker(CONTEXT ctx) {
+    public BecomeTail(CONTEXT ctx) {
         super(ctx);
     }
 
@@ -43,11 +45,20 @@ public class BecomeAttacker<CONTEXT extends CTFBotContext> extends ParamsAction<
      * run({@literal @}Param("$stuckTime") Double stuckTimeSecs)</tt>.
      */
     public ActionResult run() {
-        // Add your progress code
-        if() 
+        if(ctx.currentRole.equals("Defender"))
         {
-            ctx.currentRole = "Attacker-Tail";
-        }// start from botton;
+            ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.DEFENDER_REMOVED);
+        }
+        // Add your progress code
+        ctx.currentRole = "Attacker-Tail";
+       // ctx.teamTail = ctx.getPlayers().getPlayer(ctx.getInfo().getId());
+        
+        ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.BECAME_TAIL);
+        
+        ctx.getBot().getBotName().setInfo("TAIL");
+        
+        
+        // send message v
         return ActionResult.FINISHED;
     }
 

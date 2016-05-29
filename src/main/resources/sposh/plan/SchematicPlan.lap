@@ -1,23 +1,24 @@
 (
 	(C Head
 		(elements
-			((GetTheFlag cz.cuni.amis.pogamut.sposh.executor.DoNothing))
-			((ReturnFlag cz.cuni.amis.pogamut.sposh.executor.DoNothing))
-			((KillTheFlagHolder cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((ReturnFlag (trigger ((ctfbot.sense.ctf.HoldingFlag true ==))) ctfbot.action.ctf.RunToFlag($team='ctfbot.Team.FRIEND)))
+			((GetTheFlag ctfbot.action.ctf.RunToFlag($team='ctfbot.Team.ENEMY)))
+			((KillTheFlagHolder ctfbot.action.dm.Jump))
 		)
 	)
 	(C Defender
 		(elements
-			((BecameAHead (trigger ((ctfbot.sense.dm.SeePlayer($team='ctfbot.Team.ENEMY) true ==))) ctfbot.action.ctf.BecomeAttacker))
+			((BecameAttacker (trigger ((ctfbot.sense.ctf.EnoughDefenders) (ctfbot.sense.dm.SeePlayer($team='ctfbot.Team.ENEMY) true ==))) ctfbot.action.ctf.BecomeTail))
 			((Scavenge (trigger ((ctfbot.sense.dm.SeePlayer($team='ctfbot.Team.ENEMY) false ==))) WhatToGet))
-			((GuardFlag cz.cuni.amis.pogamut.sposh.executor.DoNothing))
-			((FollowFlagHolder cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((GuardFlag ctfbot.action.dm.Jump))
+			((FollowFlagHolder ctfbot.action.dm.Jump))
 		)
 	)
 	(C Tail
 		(elements
-			((FollowHead ctfbot.action.ctf.FollowHeadInFormation))
-			((LookBack cz.cuni.amis.pogamut.sposh.executor.DoNothing))
+			((BecomeHead (trigger ((ctfbot.sense.ctf.TeamHasHead false ==))) ctfbot.action.ctf.BecomeHead))
+			((FollowHead (trigger ((ctfbot.sense.ctf.TeamHasHead true ==))) ctfbot.action.ctf.FollowHeadInFormation))
+			((LookBack ctfbot.action.dm.Jump))
 		)
 	)
 	(C Scavenge
@@ -30,14 +31,16 @@
 			((RunForHealth (trigger ((ctfbot.sense.dm.Health 50 <))) ctfbot.action.dm.RunForItem($item='ctfbot.Item.HEALTH)))
 			((RunForItem (trigger ((ctfbot.sense.dm.IsPickableItem($type='ctfbot.Item.U_DAMAGE_PACK) true ==))) ctfbot.action.dm.RunForItem($item='ctfbot.Item.U_DAMAGE_PACK)))
 			((RunForWeapon (trigger ((ctfbot.sense.dm.IsPickableWeapon($weapon='ctfbot.Weapon.MINIGUN) true ==) (ctfbot.sense.dm.HasWeapon($weapon='ctfbot.Weapon.MINIGUN) false ==))) ctfbot.action.dm.RunForWeapon($weapon='ctfbot.Weapon.MINIGUN)))
+			((BecomeAttacker (trigger ((ctfbot.sense.ctf.EnoughDefenders))) ctfbot.action.ctf.BecomeTail))
 		)
 	)
 	(DC life
 		(drives 
-			  ((REPORTENEMY cz.cuni.amis.pogamut.sposh.executor.DoNothing))
-			  ((Attacker-Head (trigger ((ctfbot.action.ctf.HasRole($role="Attacker-Head") true ==))) Head))
-			  ((Attacker-Tail (trigger ((ctfbot.action.ctf.HasRole($role="Attacker-Tail") true ==))) Tail))
+			  ((FLAGHOLDERISHEAD (trigger ((ctfbot.sense.ctf.HoldingFlag))) ctfbot.action.ctf.RunToBase($team='ctfbot.Team.FRIEND)))
 			  ((Defender (trigger ((ctfbot.action.ctf.HasRole($role="Defender") true ==))) Defender))
+			  ((Attacker-Tail (trigger ((ctfbot.action.ctf.HasRole($role="Attacker-Tail") true ==))) Tail))
+			  ((Attacker-Head (trigger ((ctfbot.action.ctf.HasRole($role="Attacker-Head") true ==))) Head))
+			  ((REPORTENEMY cz.cuni.amis.pogamut.sposh.executor.DoNothing))
 		)
 	)
 )
