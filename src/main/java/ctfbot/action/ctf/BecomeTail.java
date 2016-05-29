@@ -47,13 +47,13 @@ import cz.cuni.amis.pogamut.unreal.communication.messages.UnrealId;
     public ActionResult run() {
         if(ctx.currentRole.equals("Defender"))
         {
-            ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.DEFENDER_REMOVED);
+            ctx.sendCTFMessageRoleChanged(ctx.getInfo().getId(), InfoType.DEFENDER_REMOVED);
         }
         // Add your progress code
         ctx.currentRole = "Attacker-Tail";
        // ctx.teamTail = ctx.getPlayers().getPlayer(ctx.getInfo().getId());
         
-        ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.BECAME_TAIL);
+        ctx.sendCTFMessageRoleChanged(ctx.getInfo().getId(), InfoType.BECAME_TAIL);
         
         ctx.getBot().getBotName().setInfo("TAIL");
         

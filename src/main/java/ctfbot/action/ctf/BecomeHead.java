@@ -5,6 +5,7 @@ import ctfbot.messages.InfoType;
 import cz.cuni.amis.pogamut.sposh.executor.ActionResult;
 import cz.cuni.amis.pogamut.sposh.executor.ParamsAction;
 import cz.cuni.amis.pogamut.sposh.executor.PrimitiveInfo;
+import java.util.logging.Level;
 
 /**
  * Action BecomeHead for Yaposh.
@@ -44,15 +45,14 @@ public class BecomeHead<CONTEXT extends CTFBotContext> extends ParamsAction<CONT
     public ActionResult run() {
         // Add your progress code
         ctx.teamHead = ctx.getPlayers().getPlayer(ctx.getInfo().getId());
-        ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.BECAME_HEAD);
+        ctx.sendCTFMessageRoleChanged(ctx.getInfo().getId(), InfoType.BECAME_HEAD);
         
+         if(ctx.currentRole.equals("Defender"))
+        {
+            ctx.sendCTFMessageRoleChanged(ctx.getInfo().getId(), InfoType.DEFENDER_REMOVED);
+        }
         
         ctx.currentRole = "Attacker-Head";
-        
-        if(ctx.currentRole.equals("Defender"))
-        {
-            ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(), InfoType.DEFENDER_REMOVED);
-        }
         
         ctx.getBot().getBotName().setInfo("HEAD");
         

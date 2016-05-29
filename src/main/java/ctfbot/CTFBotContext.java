@@ -68,9 +68,9 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     public String currentRole = "Defender";
     public String state = "";
     public Player teamHead = null;
-    //public int tailCount = 0;
     public int defenderCount = 1;
     public boolean reportedIn = false;
+    public boolean askedForHead = false;
     
     
     ///////////////////////////////////////////////////////////////////////////
@@ -159,27 +159,23 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
      */
     void logicBeforePlan() {    	        
         if (lastLogic <= 0) {
-        	log.warning("---[ LOGIC ITERATION " + (++logicIteration) + " ]---");
+        	//log.warning("---[ LOGIC ITERATION " + (++logicIteration) + " ]---");
         	lastLogic = System.currentTimeMillis();
         } else {
         	long now = System.currentTimeMillis();
-        	log.warning("---[ LOGIC ITERATION " + (++logicIteration) + " | " + (now - lastLogic) + " ms delta]---");
+        	//log.warning("---[ LOGIC ITERATION " + (++logicIteration) + " | " + (now - lastLogic) + " ms delta]---");
         	lastLogic = now;
         }
        
         isShooting = info.isShooting();
+        
         currentWeapon = weaponry.getCurrentWeapon().getType();
        
         if (info.getSelf() != null) {
         	commObjectUpdates.update();
         	commItems.update();
     	}
-        if(!reportedIn)
-        {
-            reportedIn = true;
-            setCTFMessageRoleChagned(getInfo().getId(), InfoType.DEFENDER_ADDED);
-            ++defenderCount;
-        }
+       
     }
 
     /**
@@ -187,14 +183,12 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
      */
     void logicAfterPlan() 
     {  
- 
     }
     
-     //Example usage of Location message
+    
   
-     
-     public void setCTFMessageRoleChagned(UnrealId bot, InfoType messageType)
-     { 
+    public void sendMyRole(UnrealId toWhom)
+    {
         if(!getTCClient().isConnected())
         {
             /// we should log this
@@ -202,16 +196,61 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
 		return;
 	
         }
+        if(currentRole.equals("Defender"))
+        {
+        getTCClient().sendToBot
+                (
+                    toWhom,
+                    new CTFMessage
+                    (
+                        this.getBot().getLocation(), 
+                        getInfo().getId(), 
+                        InfoType.DEFENDER_ADDED, 
+                        null// Id of new tail...
+                    )
+                );
+        }
+        if(currentRole.equals("Attacker-Head"))
+        {
+        getTCClient().sendToBot
+                (
+                    toWhom,
+                    new CTFMessage
+                    (
+                        this.getBot().getLocation(), 
+                        getInfo().getId(), 
+                        InfoType.BECAME_HEAD, 
+                        null// Id of new tail...
+                    )
+                );
+        }
+    }
+   
+    
+     //Example usage of Location message
+  
+    
+     public boolean sendCTFMessageRoleChanged(UnrealId bot, InfoType messageType)
+     { 
+        log.log(Level.SEVERE, "==============>>======================SENDING  MESSAGE ROLE:{0}", messageType);
+        if(!getTCClient().isConnected())
+        {
+            /// we should log this
+            log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>>>>>could not find TCclient!!!");
+		return false;
+	
+        }
         getTCClient().sendToTeamOthers
                 (
                     new CTFMessage
                     (
                         this.getBot().getLocation(), 
-                        bot, 
+                        getInfo().getId(), 
                         messageType, 
                         null// Id of new tail...
                     )
                 );
+        return true;
          
      }
     
@@ -226,6 +265,7 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
     //locationMessage.getInfoType()
     @EventListener(eventClass = CTFMessage.class)
     public void onCTFMessageReceive(CTFMessage message){
+        log.log(Level.SEVERE, "==============-**======================GOT MESSAGE:" + message);
            
         switch(message.getInfoType()){
                 case FRIEND:
@@ -262,8 +302,16 @@ public class CTFBotContext extends UT2004Context<UT2004Bot> {
                 case DEFENDER_REMOVED:
                     --this.defenderCount;
                     break;
+                case WHO_IS_WHO:
+                    // this means there is new defender 
+                    ++defenderCount;
+                    if(currentRole.equals("Attacker-Head")|| currentRole.equals("Defender"))
+                    {
+                        this.sendMyRole(message.getSenderId());
+                    }
+                    break;
                 default:
-                    log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>> Unknown message type.");
+                    log.log(Level.SEVERE, ">>>>>>>>>>>****>>>>>>>>>>> Unknown message type.");
         }
 	   
     }

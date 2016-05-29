@@ -50,9 +50,11 @@ public class FollowHeadInFormation<CONTEXT extends CTFBotContext> extends Params
         {// there is no team head.. this should not happen, anyway: now I am team head :DDD 
             ctx.teamHead = ctx.getPlayers().getPlayer(ctx.getInfo().getId());
            // tell other players..
-            ctx.setCTFMessageRoleChagned(ctx.getInfo().getId(),InfoType.BECAME_HEAD);
+            ctx.sendCTFMessageRoleChanged(ctx.getInfo().getId(),InfoType.BECAME_HEAD);
             ctx.currentRole = "Attacker-Head";
+            ctx.state = "changed head";
             return ActionResult.FINISHED;
+            
         }
         // if there is a head, I am going to follow him
         ctx.getNavigation().navigate(ctx.teamHead);

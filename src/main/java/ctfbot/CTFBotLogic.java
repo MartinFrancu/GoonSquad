@@ -172,7 +172,31 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
      * @see Initialize
      * @return
      */
-    
+
+      public boolean sendCTFMessageRoleChanged(UnrealId bot, InfoType messageType)
+     { 
+        log.log(Level.SEVERE, "==============++======================SENDING  MESSAGE ROLE:{0}", messageType);
+        if(!context.getTCClient().isConnected())
+        {
+            /// we should log this
+            log.log(Level.SEVERE, ">>>>>>>>>>>>>>>>>>>>>>>>>could not find TCclient!!!");
+		return false;
+	
+        }
+        context.getTCClient().sendToTeamOthers
+                (
+                    new CTFMessage
+                    (
+                        this.getBot().getLocation(), 
+                        context.getInfo().getId(), 
+                        messageType, 
+                        null// Id of new tail...
+                    )
+                );
+        return true;
+         
+     }
+
     
     @Override
     public Initialize getInitializeCommand() {
@@ -193,21 +217,25 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
     @Override
     public void botKilled(BotKilled event) {
         // 
-        context.reportedIn = false;
+        
         if(context.currentRole.equals("Defender"))
         {
-        --context.defenderCount;
+           sendCTFMessageRoleChanged(context.getInfo().getId(), InfoType.DEFENDER_REMOVED);
         }
         if(context.currentRole.equals("Attacker-Head"))
         {  
              // send message that leader died..
-            context.setCTFMessageRoleChagned(context.getInfo().getId(), InfoType.HEAD_DIED);
+           sendCTFMessageRoleChanged(context.getInfo().getId(), InfoType.HEAD_DIED);
         }
          if(context.currentRole.equals("Attacker-Tail"))
         {
-           context.setCTFMessageRoleChagned(context.getInfo().getId(), InfoType.TAIL_DIED);
+           sendCTFMessageRoleChanged(context.getInfo().getId(), InfoType.TAIL_DIED);
         }
-         context.currentRole = "Defender"; // all starts as defender
+        context.defenderCount = 0;
+        context.teamHead = null;
+        
+        context.reportedIn = false;
+        context.currentRole = "Defender"; // all starts as defender
     }
     
 
@@ -232,6 +260,19 @@ public class CTFBotLogic extends StateSposhLogicController<UT2004Bot, CTFBotCont
         sendCTFMessageFriend();
         getContext().logicBeforePlan();
         super.logicBeforePlan();
+        
+         if(!context.reportedIn)
+        {
+            context.reportedIn = true;
+            log.log(Level.SEVERE, "====================================asking for head");
+            if(! sendCTFMessageRoleChanged(context.getInfo().getId(), InfoType.WHO_IS_WHO))
+            {
+                context.reportedIn = false;// try again later
+                log.log(Level.SEVERE, "====================================could not send the message");
+            }
+        }
+        
+        
         // 
     }
 

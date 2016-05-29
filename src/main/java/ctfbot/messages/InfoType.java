@@ -32,5 +32,6 @@ public enum InfoType {
         BECAME_HEAD,
         BECAME_TAIL,
         DEFENDER_ADDED,
-        DEFENDER_REMOVED
+        DEFENDER_REMOVED,
+        WHO_IS_WHO
 }
